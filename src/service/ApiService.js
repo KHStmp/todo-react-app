@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "../app-config";
+const ACCESS_TOKEN = "ACCESS_TOKEN";
 
 export function call(api, method, request) {
     let options = {
@@ -20,5 +21,23 @@ export function call(api, method, request) {
             }
             return json;
         })
-    );
+    )
+    .catch((error) => {
+        // 추가된 부분
+        console.log(error.status);
+        if (error.status === 403) {
+            window.location.href = "/login"; // redirect
+        }
+        return Promise.reject(error);
+    });
+}
+
+export function signin(userDTO) {
+    return call("/auth/signin", "POST", userDTO)
+        .then((response) => {
+            // 로컬 스토리지에 토큰 저장
+            localStorage.setItem("ACCESS_TOKEN", response.token);
+            // token이 존재하는 경우 Todo 화면으로 리디렉트
+            window.location.href = "/";
+        });
 }
